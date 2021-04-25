@@ -20,7 +20,7 @@ pipeline {
         stage('Build artifact') {
             steps {
                 script {
-                    docker --version
+                    sh 'docker --version'
                     def now = new Date()
                     image_name = "$env.BRANCH_NAME" + now.format("yyMMdd", TimeZone.getTimeZone('CST'))
                     withCredentials([usernamePassword(credentialsId: 'AzureACR', usernameVariable:'ACR_USER', passwordVariable: 'ACR_PASSWORD')]) {
