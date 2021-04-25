@@ -2,7 +2,6 @@ pipeline {
     agent any
     environment {
         ACR_REGISTRY = 'cicdworkshop.azurecr.io'
-        IMAGE_NAME    = "$env.BRANCH_NAME"+"$java.time.LocalDate.now()"
         ACR_RES_GROUP = 'ci-cd-workshop'
         ACR_NAME = 'cicdworkshop'
     }
@@ -18,12 +17,14 @@ pipeline {
         }
         stage('Build artifact'){
             steps{
+                def now = new Date()
+                def image_name = "$env.BRANCH_NAME" + now.format("yyMMdd", TimeZone.getTimeZone('CST'))
                 acrQuickBuild azureCredentialsId: 'AzureServicePrincipal',
                     resourceGroupName: env.ACR_RES_GROUP,
                     registryName: env.ACR_NAME,
                     platform: "Linux",
                     dockerfile: "Dockerfile",
-                    imageNames: [[image: "$env.ACR_REGISTRY/$env.IMAGE_NAME:$env.BUILD_NUMBER"]]
+                    imageNames: [[image: "$env.ACR_REGISTRY/$image_name:$env.BUILD_NUMBER"]]
             }
         }
     }
