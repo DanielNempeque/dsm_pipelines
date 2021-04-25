@@ -21,7 +21,7 @@ pipeline {
                 script {
                     def now = new Date()
                     def image_name = ''
-                    image_name = "$env.BRANCH_NAME" + date.format("yyMMdd", TimeZone.getTimeZone('CST'))
+                    image_name = "$env.BRANCH_NAME" + now.format("yyMMdd", TimeZone.getTimeZone('CST'))
                 }
                 acrQuickBuild azureCredentialsId: 'AzureServicePrincipal',
                         resourceGroupName: env.ACR_RES_GROUP,
