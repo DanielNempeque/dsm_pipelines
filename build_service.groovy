@@ -22,13 +22,16 @@ pipeline {
                 script {
                     def now = new Date()
                     image_name = "$env.BRANCH_NAME" + now.format("yyMMdd", TimeZone.getTimeZone('CST'))
+
+                    withCredentials([usernamePassword(credentialsId: 'AzureACR', usernameVariable: 'ACR_USER', passwordVariable: 'ACR_PASSWORD')]{
+                        sh 'docker login -u $ACR_USER -p $ACR_PASSWORD $ACR_REGISTRY'
+                        // build image
+                        def imageWithTag = "$env.ACR_REGISTRY/$image_name:$env.BUILD_NUMBER"
+                        def image = docker.build imageWithTag
+                        // push image
+                        image.push()
+                    }
                 }
-                acrQuickBuild azureCredentialsId: 'AzureServicePrincipal',
-                        resourceGroupName: env.ACR_RES_GROUP,
-                        registryName: env.ACR_NAME,
-                        platform: "Linux",
-                        dockerfile: "Dockerfile",
-                        imageNames: [[image: "$env.ACR_REGISTRY/$image_name:$env.BUILD_NUMBER"]]
             } 
         }
     }
