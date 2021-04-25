@@ -13,7 +13,7 @@ pipeline {
                     usernamePassword(credentialsId: 'AzureACR', usernameVariable:'ACR_USER', passwordVariable: 'ACR_PASSWORD'),
                      usernamePassword(credentialsId: 'AzureDnempeque', usernameVariable:'USERNAME', passwordVariable: 'PASSWORD')
                 ]) {
-                    sh "az login -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET "   
+                    sh "az login -u $USERNAME -p $PASSWORD"   
                     sh "az webapp config container set --docker-custom-image-name $Image_name --docker-registry-server-password $ACR_PASSWORD --docker-registry-server-url https://$ACR_REGISTRY --docker-registry-server-user $ACR_USER --name emojiselector-dev --resource-group $ACR_RES_GROUP"
                     sh "az webapp restart --name emojiselector-dev --resource-group $ACR_RES_GROUP"
                 }
