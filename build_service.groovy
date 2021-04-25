@@ -11,7 +11,7 @@ pipeline {
                 echo 'executing tests'
                 nodejs('Node-16.0'){
                     sh 'npm install'
-                    sh 'npm run test a'
+                    sh 'npm run test'
                 }
             }
         }
