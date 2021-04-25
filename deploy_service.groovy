@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        docker { image 'azure-cli:latest'}
+        docker { image 'mcr.microsoft.com/azure-cli:latest'}
     }
     environment {
         ACR_REGISTRY = 'cicdworkshop.azurecr.io'
