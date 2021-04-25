@@ -4,6 +4,7 @@ pipeline {
         ACR_REGISTRY = 'cicdworkshop.azurecr.io'
         ACR_RES_GROUP = 'ci-cd-workshop'
         ACR_NAME = 'cicdworkshop'
+        CI = 'true'
     }
     stages {
         stage('Execute tests'){
