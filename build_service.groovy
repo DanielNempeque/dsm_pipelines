@@ -18,6 +18,14 @@ pipeline {
                 }
             }
         }
+        stage('Build app'){
+            steps{
+                echo 'executing tests'
+                nodejs('Node-16.0'){
+                    sh 'npm run build'
+                }
+            }
+        }
         stage('Build artifact') {
             steps {
                 script {
