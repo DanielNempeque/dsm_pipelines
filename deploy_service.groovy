@@ -7,6 +7,9 @@ pipeline {
     }
     stages {
         stage('Deploy service DEV'){
+            when {
+                expression { return "$Environments".contains('Dev') }
+            }
             steps{
                 echo 'Deploying service'
                 withCredentials([
@@ -20,11 +23,17 @@ pipeline {
             }
         }
         stage('Deploy service STG'){
+            when {
+                expression { return "$Environments".contains('Stg') }
+            }
             steps{
                 echo 'Deploying service'
             }
         }
         stage('Deploy service PROD'){
+            when {
+                expression { return "$Environments".contains('Prod') }
+            }
             steps{
                 echo 'Deploying service'
             }
