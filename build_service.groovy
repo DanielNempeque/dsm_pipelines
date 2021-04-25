@@ -1,3 +1,4 @@
+def image_name = ''
 pipeline {
     agent any
     environment {
@@ -20,7 +21,6 @@ pipeline {
             steps {
                 script {
                     def now = new Date()
-                    def image_name = ''
                     image_name = "$env.BRANCH_NAME" + now.format("yyMMdd", TimeZone.getTimeZone('CST'))
                 }
                 acrQuickBuild azureCredentialsId: 'AzureServicePrincipal',
