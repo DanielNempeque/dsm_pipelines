@@ -16,15 +16,20 @@ pipeline {
             }
         }
         stage('Build artifact'){
-            def date= new Date()
-            def image_name = "$env.BRANCH_NAME" + date.format("yyMMdd", TimeZone.getTimeZone('CST'))
-            
-            acrQuickBuild azureCredentialsId: 'AzureServicePrincipal',
-                resourceGroupName: env.ACR_RES_GROUP,
-                registryName: env.ACR_NAME,
-                platform: "Linux",
-                dockerfile: "Dockerfile",
-                imageNames: [[image: "$env.ACR_REGISTRY/$image_name:$env.BUILD_NUMBER"]]
+            steps{
+                step{
+                    script {
+                        def date= new Date()
+                        def image_name = "$env.BRANCH_NAME" + date.format("yyMMdd", TimeZone.getTimeZone('CST'))
+                    }
+                    acrQuickBuild azureCredentialsId: 'AzureServicePrincipal',
+                        resourceGroupName: env.ACR_RES_GROUP,
+                        registryName: env.ACR_NAME,
+                        platform: "Linux",
+                        dockerfile: "Dockerfile",
+                        imageNames: [[image: "$env.ACR_REGISTRY/$image_name:$env.BUILD_NUMBER"]]
+                }
+            }
         }
     }
 }
