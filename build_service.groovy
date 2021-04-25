@@ -3,7 +3,6 @@ pipeline {
     environment {
         ACR_REGISTRY = 'cicdworkshop.azurecr.io'
         IMAGE_NAME    = "$env.BRANCH_NAME"+"$java.time.LocalDate.now()"
-        BUILD_NUMBER = env.BUILD_NUMBER
         ACR_RES_GROUP = 'ci-cd-workshop'
         ACR_NAME = 'cicdworkshop'
     }
