@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        docker { image 'azure-cli:latest'}
+    }
     environment {
         ACR_REGISTRY = 'cicdworkshop.azurecr.io'
         ACR_RES_GROUP = 'ci-cd-workshop'
