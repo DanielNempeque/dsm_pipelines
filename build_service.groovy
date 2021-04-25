@@ -17,8 +17,10 @@ pipeline {
         }
         stage('Build artifact'){
             steps{
-                def date= new Date()
-                def image_name = "$env.BRANCH_NAME" + date.format("yyMMdd", TimeZone.getTimeZone('CST'))
+                step{
+                    def date= new Date()
+                    def image_name = "$env.BRANCH_NAME" + date.format("yyMMdd", TimeZone.getTimeZone('CST'))
+                }
                 acrQuickBuild azureCredentialsId: 'AzureServicePrincipal',
                     resourceGroupName: env.ACR_RES_GROUP,
                     registryName: env.ACR_NAME,
