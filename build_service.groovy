@@ -1,4 +1,5 @@
 def image_name = ''
+def date = ''
 pipeline {
     agent any
     environment {
@@ -22,10 +23,11 @@ pipeline {
                 script {
                     sh 'docker --version'
                     def now = new Date()
-                    image_name = "$env.BRANCH_NAME" + "_" +now.format("yyMMdd", TimeZone.getTimeZone('CST'))
+                    image_name = "$env.BRANCH_NAME"
+                    date = now.format("yyMMdd", TimeZone.getTimeZone('CST'))
                     withCredentials([usernamePassword(credentialsId: 'AzureACR', usernameVariable:'ACR_USER', passwordVariable: 'ACR_PASSWORD')]) {
                         sh 'docker login -u $ACR_USER -p $ACR_PASSWORD $ACR_REGISTRY'
-                        def imageWithTag = "$env.ACR_REGISTRY/$image_name:$env.BUILD_NUMBER"
+                        def imageWithTag = "$env.ACR_REGISTRY/$image_name:$env.BUILD_NUMBER_$date"
                         def image = docker.build imageWithTag
                         // push image
                         image.push()
