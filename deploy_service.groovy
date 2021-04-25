@@ -1,3 +1,4 @@
+def selector = ''
 pipeline {
     agent any
     environment {
@@ -6,28 +7,23 @@ pipeline {
         ACR_NAME = 'cicdworkshop'
     }
     stages {
-        stage('Deploy service DEV'){
+        stage('Deploy service non prod'){
             when {
-                expression { return "$Environments".contains('Dev') }
+                expression { return "$Environments".contains('Dev') || return "$Environments".contains('Stg')}
             }
             steps{
-                echo 'Deploying service'
+                script{
+                    selector = "$Environments".toLowerCase()
+                }
+                echo "Deploying service to $selector"
                 withCredentials([
                     usernamePassword(credentialsId: 'AzureACR', usernameVariable:'ACR_USER', passwordVariable: 'ACR_PASSWORD'),
-                     usernamePassword(credentialsId: 'AzureDnempeque', usernameVariable:'USERNAME', passwordVariable: 'PASSWORD')
+                    azureServicePrincipal('AzureServicePrincipal')
                 ]) {
-                    sh "az login -u $USERNAME -p $PASSWORD"   
-                    sh "az webapp config container set --docker-custom-image-name $ACR_REGISTRY/$Image_name --docker-registry-server-password $ACR_PASSWORD --docker-registry-server-url https://$ACR_REGISTRY --docker-registry-server-user $ACR_USER --name emojiselector-dev --resource-group $ACR_RES_GROUP"
-                    sh "az webapp restart --name emojiselector-dev --resource-group $ACR_RES_GROUP"
+                    sh "az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID"   
+                    sh "az webapp config container set --docker-custom-image-name $ACR_REGISTRY/$Image_name --docker-registry-server-password $ACR_PASSWORD --docker-registry-server-url https://$ACR_REGISTRY --docker-registry-server-user $ACR_USER --name emojiselector-$selector --resource-group $ACR_RES_GROUP"
+                    sh "az webapp restart --name emojiselector-$selector --resource-group $ACR_RES_GROUP"
                 }
-            }
-        }
-        stage('Deploy service STG'){
-            when {
-                expression { return "$Environments".contains('Stg') }
-            }
-            steps{
-                echo 'Deploying service'
             }
         }
         stage('Deploy service PROD'){
@@ -36,6 +32,14 @@ pipeline {
             }
             steps{
                 echo 'Deploying service'
+                withCredentials([
+                    usernamePassword(credentialsId: 'AzureACR', usernameVariable:'ACR_USER', passwordVariable: 'ACR_PASSWORD'),
+                    azureServicePrincipal('AzureServicePrincipal')
+                ]) {
+                    sh "az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID"   
+                    sh "az webapp config container set --docker-custom-image-name $ACR_REGISTRY/$Image_name --docker-registry-server-password $ACR_PASSWORD --docker-registry-server-url https://$ACR_REGISTRY --docker-registry-server-user $ACR_USER --name emojiselector --resource-group $ACR_RES_GROUP"
+                    sh "az webapp restart --name emojiselector --resource-group $ACR_RES_GROUP"
+                }
             }
         }
     }
