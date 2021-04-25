@@ -31,6 +31,7 @@ pipeline {
                 expression { return "$Environments".contains('Prod') }
             }
             steps{
+                def userInput = input message: 'Approve plan output for production?', ok: 'Approve plan'
                 echo 'Deploying service'
                 withCredentials([
                     usernamePassword(credentialsId: 'AzureACR', usernameVariable:'ACR_USER', passwordVariable: 'ACR_PASSWORD'),
