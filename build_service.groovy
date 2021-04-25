@@ -10,8 +10,8 @@ pipeline {
             steps{
                 echo 'executing tests'
                 nodejs('Node-16.0'){
-                    sh 'yarn install'
-                    sh 'yarn run test'
+                    sh 'npm install'
+                    sh 'npm run test'
                 }
             }
         }
