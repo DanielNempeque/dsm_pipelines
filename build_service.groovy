@@ -2,6 +2,9 @@ def image_name = ''
 def date = ''
 pipeline {
     agent any
+    options {
+        ansiColor('xterm')
+    }
     environment {
         ACR_REGISTRY = 'cicdworkshop.azurecr.io'
         ACR_RES_GROUP = 'ci-cd-workshop'
