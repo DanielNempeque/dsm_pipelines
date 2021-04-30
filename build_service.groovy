@@ -14,11 +14,7 @@ pipeline {
                 echo 'executing tests'
                 nodejs('Node-16.0'){
                     sh 'npm install'
-<<<<<<< HEAD
                     sh 'npm run test -- --coverage'
-=======
-                    sh 'npm run test --coverage --detectOpenHandles'
->>>>>>> c93790bc2130ec230962ad53ab84c1fae0df8de6
                 }
             }
         }
