@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Deploy service non prod'){
             when {
-                expression { return "$Environments".contains('Dev') || "$Environments".contains('Stg')}
+                expression { return "$Environments".contains('Dev') || "$Environments".contains('Qa') || "$Environments".contains('Stg')}
             }
             steps{
                 script{
