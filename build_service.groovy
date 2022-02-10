@@ -6,9 +6,8 @@ pipeline {
         ansiColor('xterm')
     }
     environment {
-        ACR_REGISTRY = 'cicdworkshop.azurecr.io'
-        ACR_RES_GROUP = 'ci-cd-workshop'
-        ACR_NAME = 'cicdworkshop'
+        ECR_REGISTRY = '436054236749.dkr.ecr.us-east-1.amazonaws.com'
+        REPO = "cicdworkshop"
         CI = 'true'
     }
     stages {
@@ -34,17 +33,17 @@ pipeline {
                 script {
                     sh 'docker --version'
                     def now = new Date()
-                    image_name = "$env.BRANCH_NAME"
+
                     date = now.format("yyMMdd", TimeZone.getTimeZone('CST'))
-                    withCredentials([usernamePassword(credentialsId: 'AzureACR', usernameVariable:'ACR_USER', passwordVariable: 'ACR_PASSWORD')]) {
-                        sh 'docker login -u $ACR_USER -p $ACR_PASSWORD $ACR_REGISTRY'
-                        def imageWithTag = "$env.ACR_REGISTRY/$image_name:$env.BUILD_NUMBER"+"_"+"$date"
+                    withCredentials([usernamePassword(credentialsId: 'AWSCreds', usernameVariable:'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                        sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $env.ECR_REGISTRY"
+                        def imageWithTag = "$env.ECR_REGISTRY/$env.REPO:$env.BRANCH_NAME"+"_"+"$env.BUILD_NUMBER"+"_"+"$date"
                         def image = docker.build imageWithTag
                         // push image
                         image.push()
                     }
                 }
-            } 
+            }
         }
     }
 }
