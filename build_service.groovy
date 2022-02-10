@@ -22,7 +22,7 @@ pipeline {
         }
         stage('Build app'){
             steps{
-                echo 'executing tests'
+                echo 'Building app'
                 nodejs('Node-16.0'){
                     sh 'npm run build'
                 }
@@ -33,14 +33,19 @@ pipeline {
                 script {
                     sh 'docker --version'
                     def now = new Date()
-
                     date = now.format("yyMMdd", TimeZone.getTimeZone('CST'))
-                    withCredentials([usernamePassword(credentialsId: 'AWSCreds', usernameVariable:'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                        sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $env.ECR_REGISTRY"
-                        def imageWithTag = "$env.ECR_REGISTRY/$env.REPO:$env.BRANCH_NAME"+"_"+"$env.BUILD_NUMBER"+"_"+"$date"
+                    withAWS(credentials: 'aws-credentials', region: 'us-east-1') {
+                        sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY"
+                        def imageWithLatest = "$ECR_REGISTRY/$REPO:latest"
+                        def imageWithTag = "$ECR_REGISTRY/$REPO:$BUILD_NUMBER"+"_"+"$date"
+                        if (GIT_BRANCH == "main"){
+                            imageWithTag = "$ECR_REGISTRY/$REPO:$BUILD_NUMBER"+"_"+"$date"+"_"+"$GIT_BRANCH"
+                        }
                         def image = docker.build imageWithTag
+                        def latest = docker.build imageWithLatest
                         // push image
                         image.push()
+                        latest.push()
                     }
                 }
             }

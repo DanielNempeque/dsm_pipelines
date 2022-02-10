@@ -1,50 +1,30 @@
 def selector = ''
+def new_image = ''
 pipeline {
     agent any
     options {
         ansiColor('xterm')
     }
+    parameters{
+        string(defaultValue: 'latest', description: 'image to deploy', name: 'IMAGE_TAG', trim: true)
+    }
     environment {
         ECR_REGISTRY = '436054236749.dkr.ecr.us-east-1.amazonaws.com'
         REPO = "cicdworkshop"
-        ACR_NAME = 'cicdworkshop'
+        ECS_NAME = 'cicd-workshop'
+        TASK_FAMILY = 'cicd-definition'
     }
     stages {
-        stage('Deploy service non prod'){
-            when {
-                expression { return "$Environments".contains('Dev') || "$Environments".contains('Qa') || "$Environments".contains('Stg')}
-            }
+        stage('Deploy'){
             steps{
                 script{
-                    selector = "$Environments".toLowerCase()
-                }
-                echo "Deploying service to $selector"
-                withCredentials([
-                    usernamePassword(credentialsId: 'AzureACR', usernameVariable:'ACR_USER', passwordVariable: 'ACR_PASSWORD'),
-                    azureServicePrincipal('AzureServicePrincipal')
-                ]) {
-                    sh "az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID"
-                    sh "az webapp config container set --docker-custom-image-name $ACR_REGISTRY/$Image_name --docker-registry-server-password $ACR_PASSWORD --docker-registry-server-url https://$ACR_REGISTRY --docker-registry-server-user $ACR_USER --name emojiselector-$selector --resource-group $ACR_RES_GROUP"
-                    sh "az webapp restart --name emojiselector-$selector --resource-group $ACR_RES_GROUP"
-                }
-            }
-        }
-        stage('Deploy service PROD'){
-            when {
-                expression { return "$Environments".contains('Prod') }
-            }
-            steps{
-                script{
-                    def userInput = input message: 'Approve plan output for production?', ok: 'Approve plan'
-                }
-                echo 'Deploying service'
-                withCredentials([
-                    usernamePassword(credentialsId: 'AzureACR', usernameVariable:'ACR_USER', passwordVariable: 'ACR_PASSWORD'),
-                    azureServicePrincipal('AzureServicePrincipal')
-                ]) {
-                    sh "az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID"
-                    sh "az webapp config container set --docker-custom-image-name $ACR_REGISTRY/$Image_name --docker-registry-server-password $ACR_PASSWORD --docker-registry-server-url https://$ACR_REGISTRY --docker-registry-server-user $ACR_USER --name emojiselector --resource-group $ACR_RES_GROUP"
-                    sh "az webapp restart --name emojiselector --resource-group $ACR_RES_GROUP"
+                    echo "Deploying service to $selector"
+                    withAWS(credentials: 'aws-credentials', region: 'us-east-1') {
+                        def task_definition = sh script:"aws ecs describe-task-definition --task-definition '$TASK_FAMILY' --region 'us-east-1'", returnStdout: true
+                        def new_task_definition = sh script:"""echo '$task_definition' | jq '.taskDefinition | .containerDefinitions[0].image = "$ECR_REGISTRY/$REPO:$IMAGE_TAG" | del(.taskDefinitionArn) | del(.revision) | del(.status) | del(.requiresAttributes) | del(.compatibilities)'""", returnStdout: true
+                        sh "aws ecs register-task-definition --region 'us-east-1' --cli-input-json '$new_task_definition'"
+                        sh "aws ecs update-service --cluster $ECS_NAME  --service $REPO --task-definition $TASK_FAMILY --force-new-deployment"
+                    }
                 }
             }
         }
