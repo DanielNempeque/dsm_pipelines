@@ -13,7 +13,7 @@ pipeline {
     stages {
         stage('SCM'){
             steps{
-                checkout scm: [[$class: 'GitSCM', source: 'https://github.com/Nexpeque/cicdworkshop.git', clean: true], poll: false
+                checkout scm: [$class: 'GitSCM', source: 'https://github.com/Nexpeque/cicdworkshop.git', clean: true], poll: false
             }
         }
         stage('Execute tests'){
