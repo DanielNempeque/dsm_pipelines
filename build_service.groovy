@@ -11,6 +11,11 @@ pipeline {
         CI = 'true'
     }
     stages {
+        stage('SCM'){
+            steps{
+                checkout scm: [$class: 'GitSCM', source: 'https://github.com/Nexpeque/cicdworkshop.git', clean: true], poll: false
+            }
+        }
         stage('Execute tests'){
             steps{
                 echo 'executing tests'
