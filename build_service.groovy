@@ -5,9 +5,7 @@ pipeline {
     options {
         ansiColor('xterm')
     }
-    parameters{
-        gitParameter branchFilter: 'origin/(.*)', defaultValue: 'main', name: 'BRANCH', type: 'PT_BRANCH'
-    }
+
     environment {
         ECR_REGISTRY = '436054236749.dkr.ecr.us-east-1.amazonaws.com'
         REPO = "cicdworkshop"
@@ -16,7 +14,7 @@ pipeline {
     stages {
         stage('SCM'){
             steps{
-                git branch: "${params.BRANCH}", url: 'https://github.com/Nexpeque/cicdworkshop.git'
+                git branch: "main", url: 'https://github.com/Nexpeque/cicdworkshop.git'
             }
         }
         stage('Execute tests'){
