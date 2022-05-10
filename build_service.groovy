@@ -11,6 +11,11 @@ pipeline {
         CI = 'true'
     }
     stages {
+        stage('SCM'){
+            steps{
+                git url: 'https://github.com/Nexpeque/cicdworkshop.git'
+            }
+        }
         stage('Execute tests'){
             steps{
                 echo 'executing tests'
